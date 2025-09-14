@@ -1,0 +1,180 @@
+---
+title: "Week 3 Assignment"
+author: "Andrea Staten"
+date: "9/7/2025"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+For this assignment, we will continue using data from the National Assessment of Educational Progress (NAEP), or the "Nation's Report Card."
+
+We are going to go through functions from the tidyverse. If you need a refresher on `filter()` and `select()`, take a look at the Work with Data primer from Week 1, available here: https://posit.cloud/learn/primers/2
+
+We'll also introduce two new tidyverse functions, `pull()` and `slice()`, to expand your set of R functions!
+
+## Step 1
+
+Let's go through the first few steps of your last assignment. In the code chunk below, (1) load your packages, (2) read in `naep-data.csv`, (3) use janitor's `clean_names()` to clean the column names, and (4) assign the clean dataset to an object. Ensure that the NAEP data is saved _in the same folder_ as this file is saved.
+
+```{r}
+# Load your packages
+library(tidyverse)
+library(janitor)
+
+naep_data_clean <- read.csv("naep-data.csv") %>% # Read in the naep-data.csv
+    clean_names() # Clean the column names using the janitor package
+```
+
+Last week we asked you four questions. Here are three of them:
+
+* What is the average score for the nation?
+* What is the average score for your home state?
+* What state has the maximum and what is the value? What about the minimum?
+
+The `glimpse()` and `skim()` functions are great exploratory tools. They allow us to quickly see the dataset's contents and summary statistics. However, what if we want to use R to answer these questions?
+
+Let's go through some examples of how to approach answering these questions using code.
+
+## Step 2
+
+The `pull()` function from the tidyverse allows us to extract a single column. Use the `pull()` function below to see what the extracted `average_score_0_500` column looks like:
+
+```{r}
+naep_data_clean %>% 
+    pull(average_score_0_500) # Extract the `average_score_0_500` column
+```
+
+Now, we want to calculate the average, or mean, of the `average_score_0_500` column. Recall that the pipe `%>%` passes the last output into the next function. We can pipe the `average_score_0_500` column into the `mean()` function to calculate the average for that column. We can leave the parenthesis inside of `mean()` empty here because the pipe is already passing the column values into `mean()`.
+
+```{r}
+naep_data_clean %>% 
+    pull(average_score_0_500) %>% 
+    mean() # Calculate the average
+```
+
+With that, you should get the result for the `average_score_0_500` column.
+
+## Step 3
+
+The `pull()` function works great when we want information from a *single* column. But the next questions ask for information from two columns, `jurisdiction` and `average_score_0_500`.
+
+If we want to answer "What is the average score for your home state?", let's filter our dataset to just our home state. The  `filter()` function keeps rows that match a certain condition.
+
+My home state is Illinois. Can you use the `filter()` function to only keep the rows where jurisdiction is equivalent (`==`) to Illinois?
+
+```{r}
+naep_data_clean %>%
+  filter(jurisdiction == "Illinois")
+```
+
+How about for your home state (or adopted state)?
+
+```{r}
+naep_data_clean %>%
+  filter(jurisdiction == "Tennessee")
+```
+
+Notice that this provides *all* of the columns of the dataset, not just `average_score_0_500`. If we want to just show the columns `jurisdiction` and `average_score_0_500`, we can use the `select()` function. `select()` keeps or drops columns using their names and types.
+
+```{r}
+naep_data_clean %>%
+    filter(jurisdiction == "Illinois") %>%
+    select(jurisdiction, average_score_0_500) # Keep only jurisdiction and average score columns
+```
+
+## Step 4
+
+Finally, let's learn a new function, `slice()`. While `select()` keeps or drops columns, `slice()` keeps or drops *rows* based on certain conditions.
+
+Let's say we want the first row of our dataset. We can use `slice(1)` to select only the first row.
+
+Can you select the 5th row of the dataset?
+
+```{r}
+naep_data_clean %>% 
+    slice(5)
+```
+
+`slice()` also has special functions for common use cases:
+
+* `slice_head()` and `slice_tail()` select the first or last rows.
+* `slice_sample()` randomly selects rows.
+* `slice_min()` and `slice_max()` select rows with highest or lowest values of a variable.
+
+There are many things that `slice()` can do. Check out the documentation to see even more application: https://dplyr.tidyverse.org/reference/slice.html
+
+Returning to our question, "What state has the maximum and what is the value? What about the minimum?", we can use our new function `slice()`.
+
+To find the row with the maximum `average_score_0_500`, use `slice_max()`:
+
+```{r}
+naep_data_clean %>% 
+    slice_max(average_score_0_500)
+```
+
+And for the minimum, use `slice_min()`:
+
+```{r}
+naep_data_clean %>% 
+    slice_min(average_score_0_500)
+```
+
+## Step 5 (reach)
+
+One unique feature of R Markdown is that you can embed R code *inside* your text by starting a line with `r`. If you include code within a single line of text, the file will display the result when you knit it! For example, when you knit this file, you will see the answers at the end of the sentences.
+
+* The average score for the nation is `r naep_data_clean %>% pull(average_score_0_500) %>% mean()`.
+
+The output of Step 3 and 4 above are data frames. If we want to use R Markdown to report our numbers, we'll have to use the handy `pull()` function to isolate each of the values.
+
+When you knit the file, the sentences below should populate with the data!
+
+* The state with the maximum average score is `r naep_data_clean %>% slice_max(average_score_0_500) %>% pull(jurisdiction)` with an average score of `r naep_data_clean %>% slice_max(average_score_0_500) %>% pull(average_score_0_500)`.
+* The state with the minimum average score is `r naep_data_clean %>% slice_min(average_score_0_500) %>% pull(jurisdiction)` with an average score of `r naep_data_clean %>% slice_min(average_score_0_500) %>% pull(average_score_0_500)`.
+
+This feature is very helpful when writing reports. Using code to display results reduces errors (no manual copying and pasting) and enhances reproducibility (others can see the steps you took to obtain your results).
+
+Can you use this feature to answer the question below using code?
+
+* The average score for my home state of `r naep_data_clean %>% filter(jurisdiction == "Tennessee") %>% pull(jurisdiction)` is `r naep_data_clean %>% filter(jurisdiction == "Tennessee") %>% pull(average_score_0_500)`.
+
+## Step 6 (reach)
+
+What's great about R is that there are multiple ways to solve problems. Can you come up with other ways to use R code for answering the questions mentioned earlier?
+
+## Questions
+
+1. How many rows are in `naep_data_clean` where `average_score_0_500` is greater than 230?
+
+* `r naep_data_clean %>% filter(average_score_0_500 > 230) %>% nrow()`
+
+2. Write a code chunk placing a negative sign before a column name when using `select()`. What does a negative sign before a column name do?
+A negative sign before a column name will exclude this column in the selection.
+
+```{r}
+naep_data_clean %>% 
+  filter(average_score_0_500 > 230) %>% 
+  select(-at_or_above_basic)
+```
+
+## Rubric
+
+|                     | Points Possible | Points Earned |
+|---------------------|-----------------|---------------|
+| File knits          | 5               |               |
+| Code is appropriate | 5               |               |
+| Question 1 answered | 5               |               |
+| Question 2 answered | 5               |               |
+
+## Knit and Submit
+
+Complete the following steps to knit and publish your work:
+
+1.  First, change the name of the `author:` in the [YAML header](https://bookdown.org/yihui/rmarkdown-cookbook/rmarkdown-anatomy.html#yaml-metadata) at the very top of this document to your name. The YAML header controls the style and feel for knitted document but doesn't actually display in the final output.
+
+2.  Next, click the knit button in the toolbar above to "knit" your R Markdown document to a [HTML](https://bookdown.org/yihui/rmarkdown/html-document.html) file that will be saved in your R Project folder. You should see a formatted webpage appear in your Viewer tab in the lower right pan or in a new browser window. Let's us know if you run into any issues with knitting.
+
+3. Upload the HTML file that is now present in the same folder as this R Markdown file to Canvas to receive credit for this assignment!

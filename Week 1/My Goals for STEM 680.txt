@@ -1,0 +1,6 @@
+My Goals for STEM 680:
+
+- Become comfortable with coding in R. 
+- Be able to open R and begin coding without having to think hard about the basics of correct syntax, etc.
+- Learn something useful to assist with the final process of my thesis!
+

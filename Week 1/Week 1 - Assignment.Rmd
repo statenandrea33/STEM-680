@@ -1,0 +1,78 @@
+---
+title: "Week 1-Assignment"
+author: "Andrea Staten"
+date: "2025-08-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+## R Basics 1
+```{r}
+library(readr)
+read.csv("Block Group Data - Sheet1.csv")
+```
+
+```{r}
+csv_table <- read_csv("Block Group Data - Sheet1.csv")
+```
+
+## R Basics 2
+```{r}
+read_delim("My Goals for STEM 680.txt", delim = "|")
+```
+
+```{r}
+mygoalsfor680 <- read_delim("My Goals for STEM 680.txt", delim = "|")
+```
+
+## R Basics 3
+```{r}
+library(readxl)
+read_excel("TN_CoPopProj_2025_2070.xlsx")
+```
+
+```{r}
+popprojections <- read_excel("TN_CoPopProj_2025_2070.xlsx")
+```
+
+## R Basics 4
+```{r}
+111 - 75 / 3
+```
+```{r}
+(111 - 75) / 3
+```
+
+## R Basics 5
+```{r}
+sqrt(3600)
+```
+
+## R Basics 6
+```{r}
+number_of_trials <-  12
+number_of_trials
+first_trial <- 3578
+first_trial
+```
+
+## R Basics 7
+```{r}
+cos(72)
+```
+
+## R Basics 8
+```{r}
+library(tibble)
+tibble(
+    utilities = c("Electric", "Fiber", "GWS"),
+    gisemp = c(1, 1, 1),
+    favrank = c(1, 2, 3)
+)
+```
+
