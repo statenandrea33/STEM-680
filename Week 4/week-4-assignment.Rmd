@@ -108,9 +108,17 @@ Create a histogram comparing multiple groups. Use ggplot2 and `facet_wrap()`. Wh
 
 ```{r}
 elsi_clean %>%
-    ggplot(aes(x = ___)) +
-    geom_histogram() +
-    facet_wrap(elsi_clean$___)
+    ggplot(aes(x = total_students_all_grades_excludes_ae_public_school_2021_22, fill = school_wide_title_i_public_school_2021_22)) +
+    geom_histogram(binwidth = 80, color = 'black') +
+    xlim(0,3500) +
+    facet_wrap(elsi_clean$school_wide_title_i_public_school_2021_22) +
+    theme_minimal() +
+    labs(
+      x = "Total Students (2021-22)",
+      y = "Count of Schools",
+      fill = "Title 1 Status",
+      title = "Distribution of School Sizes by Title 1 Status"
+    )
 ```
 
 ## Reach
@@ -123,15 +131,15 @@ This portion of the assignment is optional but offers you a chance to push your 
 
 1.  What groups did you compare in step 6? What were you able to determine to be the differences between those two groups by looking at your graphs?
 
--   
+-   I compared school sizes based off of title 1 status. I was able to determine that title 1 schools generally had a much larger student population.
 
 2.  How could a policy maker use the information you gathered (or other information contained in this dataset) to suggest changes? Are graphical representations an effective way to do this?
 
--   
+-   I think graphical representations are an effective way to communicate to policy makers. While I am not fully aware of title 1 schools fully, I think that they generally receive federal funding. I think something to look at further that would deliver good information to policy makers would be to look at the student to teacher ratio at these schools, as while funding is good other students at the different schools may be getting a better education with more hands on learning/teaching.
 
 3.  How might you make your graphs look more "publication ready?" You do not need to include code, just a general idea of what could be improved.
 
--   
+-   My graphs could look more publication ready by having appropriate colors assigned, clean titles (main title, x, and y axis), and a data visualization that accurately represents the data/message that is being conveyed.
 
 ## Rubric
 
