@@ -133,13 +133,19 @@ We note that you can choose among any of the NAEP variables. We ask you to pleas
 You must specify both the x- and y- variables when using `geom_point()`. You may also want to add another geom on a new line, `geom_smooth(method = "lm", se = FALSE)` and `geom_text(aes(label = state))`.
 
 ```{r}
-
+joined_left %>% 
+  filter(state %in% c("Alabama", "Florida", "Kentucky", "Maryland", "New Jersey", "Tennessee", "Texas", "Vermont", "Virginia", "Washington")) %>% 
+  ggplot(aes(x = average_score_0_500, y = highered, color = state, group = state))+
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  geom_text(aes(label = state))
 ```
 
 What interesting relationship (if any) did you find? Add a few notes below. Also, share ideas on what you could do to extend this analysis.
 
--   
-- 
+-   It seems like on average, most states that were selected that scored in between 232-236, spent more on higher education than other states with different score ranges.
+
+- This analysis could be extended to look at how this amount of spending is decided, as this could differ state to state and could contribute to why some have so much more to spend. 
 
 ## Reach
 
@@ -148,7 +154,15 @@ This portion of the assignment is optional but offers you a chance to push your 
 We encourage you to change the theme, color, and other aesethetics of the plot. Do so by copying your code above and extending your graph. Also, consider visualizing a different variable's relations with achievement.
 
 ```{r}
-
+joined_left %>% 
+  filter(state %in% c("Alabama", "Florida", "Kentucky", "Maryland", "New Jersey", "Tennessee", "Texas", "Vermont", "Virginia", "Washington")) %>% 
+  ggplot(aes(x = average_score_0_500, y = pell, color = state, group = state))+
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  geom_text(aes(label = state)) +
+  xlab("Average Score: 0-500") +
+  ylab("Public Pell Grant Spending, in $1,000s") +
+  labs(title = "Public Pell Grant Spending by States Average Scores")
 ```
 
 ## Rubric
