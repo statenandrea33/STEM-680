@@ -1,7 +1,7 @@
 ---
 title: "Week 5 - Teacher"
-author: "Teacher"
-date: "Assignment Due Date"
+author: "Andrea Staten"
+date: "9/21/2025"
 output: html_document
 ---
 
@@ -14,7 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 Load the tidyverse and janitor packages.
 
 ```{r}
-
+library(tidyverse)
+library(janitor)
 ```
 
 ## Step 2
@@ -22,7 +23,8 @@ Load the tidyverse and janitor packages.
 Read the tidykids and NAEP data frames to your environment.
 
 ```{r}
-
+tidykids <- read.csv("tidykids.csv")
+naep <- read.csv("naep-data.csv")
 ```
 
 ## Step 3
@@ -30,13 +32,16 @@ Read the tidykids and NAEP data frames to your environment.
 Familiarize yourself with the two data frames using functions we've used before to do so.
 
 ```{r}
+glimpse(naep)
+glimpse(tidykids)
 
+print(tidykids)
 ```
 
 What is one interesting piece of information you learned about the two datasets from your exploration?
 
 ```         
-- 
+- Both datasets are looking at data for entire states, but the tidykids data is looking at different education levels.
 ```
 
 One thing we noticed is that the tidykids data is quite big relative to the NAEP data! 
@@ -61,7 +66,7 @@ Run the code chunk below to see a representation of tidy data (from the presenta
 
 Take another look at tidykids. Which of the two above rules is broken in the tidykids dataset in its present form? Add your answer and a brief explanation for why after the bullet point below:
 
-- 
+- Each variable is not in a column, this is why there are so many rows!
 
 Fortunately, we can address this issue relatively straightforwardly. For now, run the code below; the key at this time is to begin to recognize data that isn't tidy. We'll dive deeper into the mechanics of how to transform data so that it is tidy later on.
 
@@ -75,7 +80,7 @@ tidykids_widened
 
 Do the two data frames have the same observations (in this case, states)? Note the number of rows; why is there one additional row in one dataset?
 
-- 
+- The NAEP dataset has data for the District of Columbia, but the tidykids dataset does not.
 
 At this point, we are ready to move on to joining our data.
 
@@ -84,7 +89,7 @@ At this point, we are ready to move on to joining our data.
 Now we will practice joining the two dataframes together based on the column that refers to the state. As a reminder, the column you join by must have the same name in each data frame, so you will need to use `rename()`.
 
 ```{r}
-
+naep <- rename(naep, state = Jurisdiction)
 ```
 
 Now that there is a column in each dataframe with a matching name, let's practice joining. First, let's use `right_join()`.
@@ -97,14 +102,14 @@ joined_right_2 <- right_join(naep, tidykids_widened, "state")
 
 What do you notice about these two new dataframes? Is there anything different between `joined_right_1` and `joined_right_2`?
 
--   
+-   The order of columns is different in both dataframes, one has the tidykids columns first, the other has the naep.
 
--   
+-   The number of rows is different, one has 50 and the other has 51.
 
 You can also use `left_join()`. As you likely garnered from above, right join joins all of the rows in the "right" (named second) data frame with matching rows in the "left" (named first data frame). Left join flips this. Use `left_join()` below, naming `naep` first and `tidykids_widened` second. Specify "state" as the key and name the resulting output `joined_left`.
 
 ```{r}
-
+joined_left <- left_join(naep, tidykids_widened, "state")
 ```
 
 Generally, left join is more common than right join, perhaps because it's a little more intuitive to name the data frame with all of the rows you want to keep first. Let's proceed with `joined_left`, using this for our next analyses.
@@ -112,7 +117,7 @@ Generally, left join is more common than right join, perhaps because it's a litt
 Before we proceed, let's use the clean_names() function from the janitor package we have used earlier with `joined_left`. Be sure to assign that name back to the resulting output!
 
 ```{r}
-
+joined_left <- clean_names(joined_left)
 ```
 
 ## Step 5
