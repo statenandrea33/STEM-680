@@ -34,8 +34,6 @@ Familiarize yourself with the two data frames using functions we've used before 
 ```{r}
 glimpse(naep)
 glimpse(tidykids)
-
-print(tidykids)
 ```
 
 What is one interesting piece of information you learned about the two datasets from your exploration?
