@@ -1,7 +1,7 @@
 ---
 title: "Week 6 - Teacher"
-author: "Teacher"
-date: "Assignment Due Date"
+author: "Andrea Staten"
+date: "9/28/2025"
 output: html_document
 ---
 
@@ -14,7 +14,12 @@ knitr::opts_chunk$set(echo = TRUE)
 Load the tidyverse and educationdata packages. Like all packages, you will need to install the educationdata package before loading it for the first time.
 
 ```{r}
+#install.packages("educationdata")
 
+library(tidyverse)
+library(educationdata)
+library(dplyr)
+library(skimr)
 ```
 
 ## Step 2
@@ -37,7 +42,7 @@ df <- as_tibble(df)
 In the next code chunk, please glimpse the data you accessed.
 
 ```{r}
-
+glimpse(df)
 ```
 
 You may notice that instead of College or University names, you have an identifier that is a number, `unitid`. You can look up their names here: https://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1&sid=fb7e4c13-4a9e-43a5-89eb-dfead5e01d78&rtid=6
@@ -53,7 +58,7 @@ df %>% filter(unitid == 221759)
 How many colleges/universities are there in the data set? Please count up the number of unique colleges/universities using the tidyverse/tidyverse functions in the next code chunk. 
 
 ```{r}
-
+df %>% skim(unitid)
 ```
 
 ## Step 4
@@ -62,7 +67,7 @@ To visualize the range of enrollments at all U.S. schools, let's create a histog
 
 Note that values of 99 have a special meaning. What does it mean? Add a note below:
 
-- Total
+- Total. The value of 99 represents the total value of a variable.
 
 Check out the `headcount` variable in the codebook to understand its meaning. Then, filter the data so that race and sex are both equivalent to 99. If you've successfully filtered the data, you should have only one row per unitid (college or university).
 
@@ -71,12 +76,19 @@ Then, create a histogram of the headcount variable _after_ you have filtered the
 Read about geom_histogram() here: https://ggplot2.tidyverse.org/reference/geom_histogram.html
 
 ```{r}
+df_total <- df %>% 
+  filter(race == 99, sex == 99)
 
+df_total %>% 
+    ggplot(aes(x = headcount)) +
+    geom_histogram() +
+    xlim(0,50000) +
+    ylim(0,1250)
 ```
 
 Please interpret the graph you created. What do you notice? What does this tell you?
 
-- 
+- This histogram shows a right-skewed distributions of total enrollment at universities. This tells me that there are much more smaller schools with a small enrollment than there are big universities with an enrollment of 30,000+. 
 
 ## Step 5
 
@@ -85,33 +97,44 @@ Create your own data frame *using a different variable of your choosing*. Examin
 At this stage, we are focused on becoming familiar with accessing data from the API, so don't worry too much about the specifics of your selection.
 
 ```{r}
+df_2 <- get_education_data(
+    level = "college-university",
+    source = "ipeds",
+    topic = "academic-year-tuition-prof-program",
+    filters = list(year = 2018))
 
+df_2 <- as_tibble(df_2)
 ```
 
 Why did you select the variables you selected?
 
-- 
+- It was a variable I was interested in seeing more of from our reading assignment last week.
 
 ## Step 6
 
 Complete a very brief, exploratory analysis of your date. This can be _very_ simple; just learn something about the data you accessed. recall again that the purpose of this step is to get familiar with accessing data from the API.
 
 ```{r}
+glimpse(df_2)
 
+df_2_ut <- df_2 %>% filter(unitid == 221759, tuition_type == 3)
+df_2_dentistry <- df_2 %>% filter(prof_program == 2)
+df_2_pharmacy <- df_2 %>% filter(prof_program == 6)
 ```
 
 What information did you learn from your analysis? Were there any results that surprised you?
 
-- 
+- I learned that there are two entries in this data for UT, specifically for in-state tuition. This data represented tuition values for the Veterinary Medicine and Law programs at UT!
 
-- 
+- I also wanted to compare the most expensive programs costs between Pharmacy and Dentistry. The most expensive for Dentistry was 135,286 dollars, and this was at the University of the Pacific in Stockton, CA (120883). Pharmacy won the comparison with having the University of Texas in Tyler, TX (228802) cost 326,686 dollars.
+
 
 
 ## Reach
 
 This portion of the assignment is optional but offers you a chance to push your skills further.
 
-Think of an issue University of Tennessee, Knoxville Chancellor Donde Plowman might be interested in. Create a new data frame that could be presented to Donde Plowman to address this interest. Complete a simple analysis to hep Donde understand what the data is saying. 
+Think of an issue University of Tennessee, Knoxville Chancellor Donde Plowman might be interested in. Create a new data frame that could be presented to Donde Plowman to address this interest. Complete a simple analysis to help Donde understand what the data is saying. 
 
 ```{r}
 
