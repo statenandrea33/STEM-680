@@ -1,7 +1,7 @@
 ---
 title: "Week 7-8 Assignment"
-author: ""
-date: ""
+author: "Andrea Staten"
+date: "10/12/25"
 output: html_document
 ---
 
@@ -24,9 +24,9 @@ The American Association of University Professors is frustrated with the extant 
 
 Based on the readings you completed this week and your values and vision as an individual, please briefly (one sentence or fewer) describe the three or more principles you plan to use to guide the ranking system you will create in this assignment below the three dashes. Please note: you may not completely adhere to these principles as you actually access and prepare the data and create your ranking system --- and that's okay, as there are (always) limitations to the data we can access and use as variables! You'll have a chance to reflect on how much you adhered to your principles at the end of this assignment.
 
-- 
-- 
-- 
+- My first principle would be job placement or salary range post graduation. 
+- The second principle would be ranking based on how many students were able to successfully graduate.
+- The last principle would be in regards to lower-income students, either how much support they receive or how many scholarhsips a university gives out.
 
 ## Step 3
  
@@ -34,9 +34,9 @@ For your ranking system, you are permitted to use any data available from the ed
 
 Building from the three principles you described in the prior step, what are three or more variables you could include? You may plan to include more than three variables; that is fine, but *only three are required* for the assignment. Please find these three or more variables here: https://educationdata.urban.org/documentation/colleges.html
 
--
-- 
--
+- Some aggregation of data from the Earnings section.
+- Completion Rate 150 % from the Graduation rates section.
+- Number Receiving Grants in the Student Financial Aid section.
 
 ## Step 4
 
@@ -45,7 +45,23 @@ Now, we are ready to return to coding. Please write code to access data for the 
 Please note: it may take multiple attempts to download precisely the data you want. Recall that the above-linked webpage with documentation includes R code you can copy, paste, and modify. Pay attention to the year and other variables you can filter on.
   
 ```{r}
+earnings <- get_education_data(level = "college-university",
+    source = "scorecard",
+    topic = "earnings",
+    filters = list(year = 2018))
+```
+```{r}
+graduates <- get_education_data(level = "college-university",
+    source = "ipeds",
+    topic = "grad-rates",
+    filters = list(year = 2017))
+```
 
+```{r}
+studentaid <- get_education_data(level = "college-university",
+    source = "ipeds",
+    topic = "sfa-grants-and-net-price",
+    filters = list(year = 2012))
 ```
 
 ## Step 5
@@ -53,7 +69,27 @@ Please note: it may take multiple attempts to download precisely the data you wa
 In this step, you'll further process the data prior to joining the data frames together. Recall how last week we had to filter the data to only include rows associated with the total values we were interested in; the data you accessed is likely disaggregated by different variables, and in this step you'll dive into the specifics of the data you accessed so that you have precisely the variable in the form you want it to be in to include in your ranking. Refer to our code-along for this week for some tips, but note that the steps you must take may differ depending on the variable(s) you chose. Perfect isn't the goal! Try to work toward having a variable you understand and can interpret, rather than having the absolutely perfect format for your variable(s) of choice at this stage.
 
 ```{r}
+earnings <- as_tibble(earnings)
 
+earnings <- earnings %>% 
+  filter(cohort_year == 2012) %>% 
+  select(unitid, earnings_med)
+```
+
+```{r}
+graduates <- as_tibble(graduates)
+
+graduates <- graduates %>% 
+  filter(cohort_year == 2012) %>% 
+  select(unitid, completion_rate_150pct)
+```
+
+```{r}
+studentaid <- as_tibble(studentaid)
+
+studentaid <- studentaid %>% 
+  filter(tuition_type == 99) %>% 
+  select(unitid, number_of_students, number_receiving_grants)
 ```
 
 ## Step 6
@@ -61,8 +97,8 @@ In this step, you'll further process the data prior to joining the data frames t
 In this step, please join the data frames together to create a single data frame. Again, refer to our code-along for this last week for some tips.
 
 ```{r}
-
-
+combined_data <- inner_join(earnings, graduates, by = c("unitid"))
+combined_data <- inner_join(combined_data, studentaid, by = c("unitid"))
 ```
 
 ## Step 7
@@ -70,16 +106,45 @@ In this step, please join the data frames together to create a single data frame
 Finally ready to create the ranking! Now that you have one data frame from the last step, we will use the four functions from this week to create a metric to find the best college. Considering using `mutate()` as well as the other functions we used in the code-along this last week.
 
 ```{r}
+combined_data <- combined_data %>% 
+  distinct(unitid, .keep_all = TRUE)
 
+combined_data <- combined_data %>% 
+  mutate(earnings_med_rank = min_rank(earnings_med),
+         completion_rate_150pct_rank = min_rank(completion_rate_150pct),
+         number_receiving_grants_rank = min_rank(number_receiving_grants)) %>%   
+  select(unitid, earnings_med_rank, completion_rate_150pct_rank, number_receiving_grants_rank)
+
+final_ranks <- combined_data %>% 
+  mutate(total_rank = (earnings_med_rank + completion_rate_150pct_rank + number_receiving_grants_rank) / 3) %>% 
+  arrange(total_rank) # sort the data by total rank (average rank)
+
+View(final_ranks)
 ```
 
 ## Step 8
 
 Finally, please interpret the top ten colleges based on your ranking. Note how this was done in the code-along. What did you find? What do you think of your rankings? And, reflect back on the principles you laid out earlier. Which were you able to adhere to, and which were challenging given the availability or nature of the data in the educationdata package and the Education Data Portal API? Please add two or more notes in response to these prompts to below.
 
-- 
-- 
+```{r}
+directory <- get_education_data(level = "college-university",
+                                source = "ipeds",
+                                topic = "directory",
+                                filters = list(year = 2012))
 
+directory <- directory %>% 
+  select(unitid, inst_name)
+
+final_ranks_inst <- final_ranks %>% 
+  left_join(directory) %>% 
+  select(inst_name, total_rank)
+
+View(final_ranks_inst)
+```
+
+- I am not sure what to make of my rankings. I guess it is to be expected, but I have never heard of any of the top 10 schools.
+- I wish more ratios or percentages were available for the data I was looking for. Due to the nature of my data I feel like the rankings came out a bit odd. 
+ 
 ## Reach
 
 One thing you may have noticed is that by including all schools (not only those of a certain type, e.g. four-year colleges or universities or colleges or universities that offer advanced degrees), some unexpected universities may come out as top in your output. For this strictly optional reach, consider filtering the data you use to create the rankings to only include certain schools --- those of a certain type or minimum size, for instance. 
