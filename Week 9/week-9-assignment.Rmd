@@ -1,7 +1,7 @@
 ---
 title: "Week 9 Assignment"
-author: ""
-date: ""
+author: "Andrea Staten"
+date: "10/19/2025"
 output: html_document
 ---
 
@@ -22,7 +22,7 @@ library(tidyverse)
 As noted in this week's class, we will be using data similar to that we accessed from the educationdata R package. For simplicity and to focus more on grouping and summarizing, I've provided a CSV with the data in Canvas; you can read it as follows:
 
 ```{r}
-elsi_data <- read_csv(___, skip = 6)
+elsi_data <- read_csv("ELSI_csv_export.csv", skip = 6)
 
 # This .csv has 6 rows of information before the data starts. We must tell R to skip the 6 rows of information in order for the data to import correctly. To do this, we include "skip = 6" after the file name. 
 ```
@@ -37,13 +37,13 @@ elsi_data <- janitor::clean_names(elsi_data)
 In the next code chunk, please use `glimpse()` to get a sense for the data we are using.
 
 ```{r}
-
+glimpse(elsi_data)
 ```
 
 Write down two or more observations about the data (just from a glimpse of it) below:
 
-- 
-- 
+- The data is looking at schools in Tennessee.
+- It looks like it provides a lot of information on student to teacher ratios.
 
 ## Step 4
 
@@ -60,7 +60,8 @@ elsi_data <- elsi_data %>%
 In this step, let's start with a grouping operation --- simply grouping the data by district. In our data, the district is identified by the variable "`agency_id_nces_assigned_public_school_latest_available_year`. Please use `group_by()` to group the data by that variable in the code chunk below. Be sure to assign a name to the resulting output so we can use our grouped data in the next step!
 
 ```{r}
-
+elsi_grouped <- elsi_data %>% 
+  group_by(agency_id_nces_assigned_public_school_latest_available_year)
 ```
 
 ## Step 6
@@ -68,7 +69,8 @@ In this step, let's start with a grouping operation --- simply grouping the data
 Now, let's calculate the average - the *mean* - number of students in each district using our grouped data. Refer back to the slides from this week if you need a pointer on how to do this! Please note that the variable indicating the number of students in each school is `total_students_all_grades_excludes_ae_public_school_2021_22`.
 
 ```{r}
-
+elsi_grouped %>% 
+  summarise(mean_students = mean(total_students_all_grades_excludes_ae_public_school_2021_22))
 ```
 
 Once complete, you've done the core steps involved in grouping and summarizing! The rest only fills in some details on the use of these helpful dplyr "verbs".
@@ -78,7 +80,9 @@ Once complete, you've done the core steps involved in grouping and summarizing! 
 In this step, please group the data by a _different_ (not another) group, specifically either the variable indicating the **locale** of the school, its title I status, participation in a school lunch program, or the type of district it is. In other words, instead of grouping the data by district, group by one of these last four variables in the data set. Then, calculate the same summary statistic you calculated in step 6.
 
 ```{r}
-
+elsi_grouped2 <- elsi_data %>% 
+  group_by(locale_public_school_2021_22) %>% 
+  summarise(mean_students = mean(total_students_all_grades_excludes_ae_public_school_2021_22))
 ```
 
 ## Step 8
@@ -86,7 +90,10 @@ In this step, please group the data by a _different_ (not another) group, specif
 Now, please group by *any two variables of your choosing*, and calculate the same summary statistic as in the last two steps. Additionally, please use the `arrange()` function we used in weeks 7-8 to sort the rows of your data based on the summary statistic you calculated.
 
 ```{r}
-
+elsi_groupmultiple <- elsi_data %>% 
+  group_by(national_school_lunch_program_public_school_2021_22, agency_type_district_2021_22) %>% 
+  summarise(mean_students = mean(total_students_all_grades_excludes_ae_public_school_2021_22)) %>% 
+  arrange(mean_students)
 ```
 
 ## Step 9
@@ -94,12 +101,19 @@ Now, please group by *any two variables of your choosing*, and calculate the sam
 Lastly, please *group by one or more variables of your choosing*, and calculate *three or more summary statistics*. 
 
 ```{r}
-
+elsi_final <- elsi_data %>% 
+  group_by(agency_id_nces_assigned_public_school_latest_available_year, locale_public_school_2021_22) %>% 
+  summarise(mean_students = mean(total_students_all_grades_excludes_ae_public_school_2021_22), min_students = min(total_students_all_grades_excludes_ae_public_school_2021_22),
+            max_students = max(total_students_all_grades_excludes_ae_public_school_2021_22)) %>% 
+  arrange(mean_students)
+  
 ```
 
 ## Step 10
 
 Based on your work in step 9, please add a few notes to interpret your aggregation of schools by district. What do you notice about your summary statistics? It may be helpful to use `arrange()` to sort the rows of your data frame. Additionally, it may be helpful to lookup the names of districts; you can do that at the following URL:
+
+- What I noticed is most schools with smaller student bodies were in rural areas, while cities or towns tended to have larger student bodies. This makes sense, after looking at a few of the outliers of schools in cities with small student bodies, both of the ones I selected were schools for the blind and deaf.
 
 https://nces.ed.gov/ccd/districtsearch/
 
