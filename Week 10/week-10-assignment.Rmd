@@ -1,7 +1,7 @@
 ---
 title: "Week 10 Assignment"
-author: "Student Name"
-date: "Assignment Due Date"
+author: "Andrea Staten"
+date: "10/26/2025"
 output: html_document
 ---
 
@@ -22,10 +22,10 @@ library(tidyverse)
 Next, let's load two files, one for the data on nurses (from the [*National Teacher and Principal Survey*](https://nces.ed.gov/surveys/ntps/)) and the other a simple data frame with the names of U.S. states and their region. For data access, I uploaded them in Canvas.
 
 ```{r}
-dat <- read_csv("    ") # data on nurses in U.S. schools, by state
+dat <- read_csv("ntps2021_7341_s1s.csv") # data on nurses in U.S. schools, by state
 dat
 
-state_by_region <- read_csv("   ") # data on U.S. states' regions
+state_by_region <- read_csv("us census bureau regions and divisions.csv") # data on U.S. states' regions
 ```
 ## Step 3
 
@@ -36,7 +36,8 @@ The problem is this file has _aggregate_ data for all public schools before the 
 Your task is to read the data on nurses again, skipping a suitable number of rows so that the variable name is for the state, and the first row is the first state in the data.
 
 ```{r}
-
+dat2 <- read.csv("ntps2021_7341_s1s.csv", skip = 7)
+dat2
 ```
 
 ## Step 4
@@ -50,7 +51,8 @@ We can use `select()` to do all of these. Refer to the documentation for `select
 *Documentation for `select()`*: https://dplyr.tidyverse.org/reference/select.html
 
 ```{r}
-
+dat2 <- dat2 %>% 
+  select(State = State, avg_nurses = 2, students_per_nurse = 4)
 ```
 
 ## Step 5
@@ -60,7 +62,8 @@ There are some missing values in the variable for the state. Let's remove those 
 https://dplyr.tidyverse.org/reference/filter.html
 
 ```{r}
-
+dat3 <- dat2 %>% 
+  filter(State != "NA")
 ```
 
 ## Step 6
@@ -68,7 +71,8 @@ https://dplyr.tidyverse.org/reference/filter.html
 The key challenge at this point is that we need the data to be in _long_ format. In this step, please transform the data to be in long format, so that the two variables in the data are considered to be two different observations for the same state, and the values represent the values for each of the two variables.
 
 ```{r}
-
+dat4 <- dat3 %>%
+  pivot_longer(!State, names_to = "variable", values_to = "values")
 ```
 
 ## Step 7
@@ -76,7 +80,7 @@ The key challenge at this point is that we need the data to be in _long_ format.
 Last, please join the `state_by_region` data to your data (now in long format). Optionally, you may wish to use `filter()` to remove any states without a region in this step. 
 
 ```{r}
-
+joined_data <- inner_join(dat4, state_by_region, by = c("State"))
 ```
 
 ## Step 8
@@ -84,27 +88,44 @@ Last, please join the `state_by_region` data to your data (now in long format). 
 We're ready for an analysis! Now, please group by region, and summarize the mean *and* standard deviation for the two variables for each region --- this may make interpretation just a bit clearer later on. You can also choose to filter the data frame later (or not at at all), if you prefer.
 
 ```{r}
-
+grouped_data <- joined_data %>% 
+  group_by(Region) %>% 
+  summarise(
+    mean_avgnurses = mean(variable == "avg_nurses"),
+    mean_studentspernurse = mean(variable == "students_per_nurse"),
+    sd_avgnurses = sd(variable == "avg_nurses"),
+    sd_studentspernurse = sd(variable == "students_per_nurse")
+  )
 ```
 
 What do you notice about any differences by region? Add a note or two below.
 
-- 
+- The differences by region are very minimal.
 
 ## Step 9
 
 In this step, please group by division---instead of region---using the code chunk below and summarize the same statistics (mean and SD), and briefly add a note or two on your findings.
 
 ```{r}
-
+grouped_data2 <- joined_data %>% 
+  group_by(Division) %>% 
+  summarise(
+    mean_avgnurses = mean(variable == "avg_nurses"),
+    mean_studentspernurse = mean(variable == "students_per_nurse"),
+    sd_avgnurses = sd(variable == "avg_nurses"),
+    sd_studentspernurse = sd(variable == "students_per_nurse")
+  )
 ```
+
+- The data has a slightly bigger difference between divisions than regions did.
 
 ## Step 10
 
 In this final step, please transform your data to be _back_ in wide format. 
 
 ```{r}
-
+joined_data_wide <- joined_data %>% 
+  pivot_wider(names_from = "variable", values_from = "values")
 ```
 
 ## Reach
