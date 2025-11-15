@@ -1,0 +1,201 @@
+---
+title: "Week 13 Assignment"
+author: "Andrea Staten"
+date: "11/15/2025"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this homework, we will work with text gathered from a recent class recording. When Zoom records, it collects a transcript with time stamps and speaker identifiers. Before beginning, please download the Zoom data file(s) from Canvas and save them in a separate folder.
+
+## Step 1
+
+Load the tidyverse package. We will also use the tidytext package. Install and load this package if you have not already done so.
+
+```{r}
+#install.packages("tidytext")
+
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(forcats)
+library(tidytext)
+```
+
+## Step 2
+
+Let's start by working with some text. Here's an example that captures the core steps.
+
+```{r}
+my_sentences <- tibble(sentences = c("I think that she's really good at playing soccer, but he's probably a better dancer, especially at his age", "I really like to watch soccer games, especially for OneKnox", "She was a great goalkeeper, perhaps because she played soccer from such a young age"))
+
+my_sentences %>% 
+  unnest_tokens(word , sentences) %>% # separate words, removing punctuation
+  count(word) %>% # counting words
+  arrange(desc(n)) %>% # arranging by frequency
+  anti_join(stop_words) # removing common words, or "stop" words
+```
+
+Before moving on to analyzing class data, what do you think are two benefits of analyzing text data in your field?
+
+- I think analyzing text data in the GIS utility world could result in better reporting and documentation of issues that can arise. It could also potentially help with asset management and planning.
+
+## Step 3
+
+Now, let's do the same with our Zoom data.
+
+```{r}
+# First, read the class Zoom transcript CSV data. You can download this from Canvas!
+transcript <- read.csv("F25-STEM680_processed transcript.csv")
+
+# In this next step, use similar code from Step 2.
+transcript %>% 
+  unnest_tokens(word, text) %>% 
+  count(word) %>% 
+  arrange(desc(n)) %>% 
+  anti_join(stop_words)
+```
+
+Does looking at the top 10 words spoken in class give you an idea of what the class is about? Or any other meaningful information about the interactions that occurred?
+
+-  Yes, it very clearly shows that this lesson was on analyzing text data, and even gives me a clue that the tidytext package would be used. 
+
+## Step 4
+
+Let's create a column chart of the top words, styling it and making it easier to interpret by using color to enhance the plot. Please use a color package other than the default color and include axis titles. You may have to use `slice()` to make the graph clearer. 
+
+```{r}
+top_words <- transcript %>%
+  unnest_tokens(word, text) %>%
+  count(word) %>%
+  arrange(desc(n)) %>% 
+  anti_join(stop_words) %>% 
+  slice_head(n = 10)
+
+ggplot(top_words, aes(x = reorder(word, n), y = n, fill = word)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_viridis_d(option = "magma", name = "Top Words") +
+  labs(
+    x = "Words",
+    y = "Frequency",
+    title = "Top Words in Class"
+  ) +
+  theme_minimal()
+```
+
+## Step 5
+
+Calculate the mean duration of the time spoken, then create a plot, coloring the points by the number of times each individual spoke. Be sure to include axis titles.
+```{r}
+library(lubridate)
+
+transcript <- transcript %>%
+  mutate(
+    start = hms(start),
+    end   = hms(end),
+    start = as.numeric(start, "seconds"),
+    end   = as.numeric(end, "seconds")
+  )
+```
+
+
+```{r}
+mean_utterance_duration_and_n_utterances <- transcript %>%
+    mutate(utterance_duration = end - start) %>% 
+  group_by(name) %>% 
+  summarize(mean_utterance_duration = mean(utterance_duration),
+            n_utterances = n()) %>% 
+  arrange(desc(mean_utterance_duration))
+```
+
+```{r}
+# Use this code chunk for the plot.
+ggplot(mean_utterance_duration_and_n_utterances) +
+  aes(
+    x = reorder(name, mean_utterance_duration), 
+    y = mean_utterance_duration, 
+    color = n_utterances
+  ) +
+  geom_point(size = 3) +
+  labs(
+    x = "Speaker",
+    y = "Mean Utterance Duration (seconds)",
+    title = "Mean Utterance Duration by Speaker"
+  ) +
+  scale_color_gradient(low = "lightblue", high = "red") +
+  theme_minimal()
+```
+
+Who spoke the most? Does this result surprise you?
+
+- Hanall Sung spoke the most, this does not surprise me because this course is now asynchronous and these lectures are recorded by her.
+
+If someone not associated with the class were given your graph, what do you think they would interpret about interactions in the class?
+
+- I think they would likely be confused because this transcript would not resemble a normal class lecture, like the beginning of the semesters lectures probably looked like.
+
+## Step 6
+
+In this step, determine how many times the instructor spoke the word "data" over the class. Hint: use code similar to Steps 2 and 3. As a reach, calculate the mean number of "data" words per minute spoken (you may need to use the package lubridate). 
+
+```{r}
+data_mentions <- transcript %>% 
+  filter(name == "Hanall Sung") %>% 
+  unnest_tokens(word, text) %>% 
+  filter(word == "data") %>% 
+  count()
+
+total_duration <- max(transcript$end) - min(transcript$start)
+data_mentions_per_min <- (data_mentions$n/total_duration)*60
+data_mentions
+data_mentions_per_min
+```
+
+
+## Ethics
+
+What could be an ethical concern with presenting the Zoom data as it was given to you? (e.g., the inclusion of screen names, etc.)
+
+- Displaying screen names, which could be interpreted as person information, without consent could be an ethical concern.
+
+What ethical concerns might be present when sharing word frequencies to a large audience?
+
+- I guess depending on the subject work frequencies could be taken out of context and misrepresent the original purpose of the text.
+
+What is one other ethical concern you have with text/transcript data?
+
+- I think one ethical concern I have is text could be easily used to manipulate data to support a particular agenda.
+
+## Reach
+
+As a reach, conduct a sentiment analysis on the Zoom transcript data from class. To see code on how to do this, visit: https://www.tidytextmining.com/sentiment
+
+```{r}
+
+```
+
+## Rubric
+
+|                                               | Points Possible | Points Earned |
+|----------------------------------------|----------------|----------------|
+| File knits                                    | 2               |               |
+| Code is accurately filled in for all 6 steps. | 10              |               |
+| Step 2 Question                               | 3               |               |
+| Step 3 Questions                              | 3               |               |
+| Step 5 Question                               | 3               |               |
+| Ethics Questions (3 points each)              | 9               |               |
+
+## Knit and Submit
+
+Complete the following steps to knit and publish your work:
+
+1.  First, change the name of the `author:` in the [YAML header](https://bookdown.org/yihui/rmarkdown-cookbook/rmarkdown-anatomy.html#yaml-metadata) at the very top of this document to your name. The YAML header controls the style and feel for knitted document but doesn't actually display in the final output.
+
+2.  Next, click the knit button in the toolbar above to "knit" your R Markdown document to a [HTML](https://bookdown.org/yihui/rmarkdown/html-document.html) file that will be saved in your R Project folder. You should see a formatted webpage appear in your Viewer tab in the lower right pan or in a new browser window. Let's us know if you run into any issues with knitting.
+
+3.  Upload the HTML file that is now present in the same folder as this R Markdown file to Canvas to receive credit for this assignment!
