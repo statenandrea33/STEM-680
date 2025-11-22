@@ -1,0 +1,143 @@
+---
+title: "Week 14 Assignment"
+author: "Andrea Staten"
+date: "11/23/2025"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this homework, you are going to complete text analysis on some of your own text data. The data could be course evaluations, open-ended survey responses from research you've conducted, or some other source of original text data. Specifically, our text analysis is going to center around topic modeling. Here is a great resource with example code: https://www.tidytextmining.com/topicmodeling
+
+## Step 1
+
+Load the tidyverse and topicmodels R packages.
+
+```{r}
+#install.packages("topicmodels")
+#install.packages("reshape2")
+
+library(tidyverse)
+library(topicmodels)
+library(reshape2)
+```
+
+## Step 2
+
+Next, you will need to upload your data. If this data is in multiple files, you will need to combine them into one dataset using the skills you have developed earlier (especially joining data on a common key!). There is a good chance your data is not tidy. Take some time to practice tidying your data before moving onto Step 3 - select, filter, and so on!
+
+*Note --- you may not have data you can use. That's okay, and we have some backup data in such cases. You can uncomment the line in the code chunk below to download data from discussions from Massively Open Online Courses for Educators (MOOC-Ed) at NC State University. Specifically, the data is from a MOOC-Ed course on Teaching Statistics.*
+
+```{r, code chunk to read in backup data we have provided}
+
+install.packages("readr")
+library(readr)
+forums_dtm <- read_rds("https://github.com/utkeds/foundations-data-sci/blob/main/data/forums-dtm.rds?raw=true")
+```
+
+```{r}
+dtm <- forums_dtm
+```
+
+
+## Step 3
+
+Now, let's begin the process of determining the topics.
+
+```{r}
+k <-  5
+lda_model_5 <- LDA(dtm, k=k, control = list(seed=1234))
+
+library(tidytext)
+
+topics_5 <-  tidy(lda_model_5, matrix = "beta")
+
+top_terms_5 <-  topics_5 %>% 
+  group_by(topic) %>% 
+  slice_max(beta, n = 5) %>% 
+  ungroup() %>% 
+  arrange(topic, desc(beta))
+
+top_terms_5
+```
+
+Name each topic you found. There is no right or wrong answer here; make it something unique yet descriptive.
+
+-   Student/Teacher Ratio
+
+-   Teaching Style/Design
+
+-   Testing Results per School
+
+-   School Performance
+
+-   Students Opinions
+
+## Step 4
+
+Your task in this next step is to copy and then modify the code above to estimate and interpret a model with a different number of topics. Recall that the choice for the value of *k* is up to the analyst, and depends on concerns of interpretability and parsimony (as well as fit metrics that you can explore if you wish to take this analysis further). Please copy and paste the code above and choose several values of k, trying to understand what the "best" value for k may be.
+
+```{r}
+k <-  3
+lda_model_3 <- LDA(dtm, k=k, control = list(seed=1234))
+
+library(tidytext)
+
+topics_3 <-  tidy(lda_model_3, matrix = "beta")
+
+top_terms_3 <-  topics_3 %>% 
+  group_by(topic) %>% 
+  slice_max(beta, n = 5) %>% 
+  ungroup() %>% 
+  arrange(topic, desc(beta))
+
+top_terms_3
+```
+
+Why did you choose *k* to be the value it is?
+
+-   I felt like my results with k = 5 were a bit hard to understand the true topic, so I was curious if a slight decrease would help.
+
+Are there topics that remained the same from Step 3? Did they change? How would you name the topics now?
+
+-   There are topics that remained the same. I do still think I would name them the same thing as well.
+
+## Discussion Questions
+
+How do you think you could use topic modeling in your thesis or dissertation?
+
+-   I think I could use topic modeling in my thesis as a way to ensure I am following my research questions closely.
+
+What are ethical considerations you should take when publishing topic models?
+
+-  I think some ethical concerns can come up due to the amount of interpretation that is required when looking at results. 
+
+## Reach
+
+As a reach, conduct a sentiment analysis on the Zoom transcript data from class. To see code on how to do this, visit: https://www.tidytextmining.com/sentiment
+
+```{r}
+
+```
+
+## Rubric
+
+|                                               | Points Possible | Points Earned |
+|----------------------------------------|----------------|----------------|
+| File knits                                    | 2               |               |
+| Code is accurately filled in for all 4 steps. | 12              |               |
+| Step 3 Question                               | 4               |               |
+| Step 4 Questions                              | 4               |               |
+| Discussion Questions                          | 8               |               |
+
+## Knit and Submit
+
+Complete the following steps to knit and publish your work:
+
+1.  First, change the name of the `author:` in the [YAML header](https://bookdown.org/yihui/rmarkdown-cookbook/rmarkdown-anatomy.html#yaml-metadata) at the very top of this document to your name. The YAML header controls the style and feel for knitted document but doesn't actually display in the final output.
+
+2.  Next, click the knit button in the toolbar above to "knit" your R Markdown document to a [HTML](https://bookdown.org/yihui/rmarkdown/html-document.html) file that will be saved in your R Project folder. You should see a formatted webpage appear in your Viewer tab in the lower right pan or in a new browser window. Let's us know if you run into any issues with knitting.
+
+3.  Upload the HTML file that is now present in the same folder as this R Markdown file to Canvas to receive credit for this assignment!
